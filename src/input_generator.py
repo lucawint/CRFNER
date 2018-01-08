@@ -8,7 +8,6 @@ class InputGenerator():
         self.entities = entities
         self.c_by_c = c_by_c
 
-        self._calculate_length()
         self._set_gen()
 
     def _calculate_length(self):
@@ -34,4 +33,6 @@ class InputGenerator():
         return next(self.gen)
 
     def __len__(self):
+        if self.length is None:
+            self._calculate_length()
         return self.length

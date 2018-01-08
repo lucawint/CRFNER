@@ -127,7 +127,7 @@ class HTMLTokenizer():
         return curr_tuples
 
     @staticmethod
-    def _process_doc(doc):
+    def _preprocess_doc(doc):
         # Close style tags
         doc = re.sub('(?P<unclosed><style.+?>.+?{.+?})', '\g<unclosed></style>', doc)
 
@@ -138,7 +138,7 @@ class HTMLTokenizer():
 
     @classmethod
     def inline_to_tuples(cls, doc: str, entities: list, char_by_char: bool):
-        doc = cls._process_doc(doc)
+        doc = cls._preprocess_doc(doc)
 
         return cls._inline_to_tuples(entities=entities,
                                      char_by_char=char_by_char,
