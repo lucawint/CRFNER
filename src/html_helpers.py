@@ -47,7 +47,7 @@ class HTMLTokenizer():
             tuples.append((f'</{tag}>', OTHER_ENT_TYPE))
 
     @staticmethod
-    def _inline_to_tuples(entities: list, char_by_char: bool,
+    def _inline_to_tuples(entities: list, c_by_c: bool,
                           char_iter: iter, whole_start_tag=None,
                           override_tag=None):
         curr_tuples = []
@@ -77,15 +77,11 @@ class HTMLTokenizer():
                     if end_tag == tag_name:
                         break
 
-                    if tag_name in UNPROCESSED_TAGS:
-                        # TODO
-                        print(f'Processing unprocessed {tag_name} thing')
-
                     HTMLTokenizer._add_tokens_to_tuples(
                         tuples=curr_tuples,
                         tokens=HTMLTokenizer._tokenize(
                             text_to_tokenize,
-                            char_by_char),
+                            c_by_c),
                         tag=prev_tag_word,
                         entities=entities
                     )
@@ -98,7 +94,7 @@ class HTMLTokenizer():
 
                     nested_tuples = HTMLTokenizer._inline_to_tuples(
                         entities=entities,
-                        char_by_char=char_by_char,
+                        c_by_c=c_by_c,
                         char_iter=char_iter,
                         whole_start_tag=whole_start_tag,
                         override_tag=override_tag
@@ -106,10 +102,28 @@ class HTMLTokenizer():
 
                     curr_tuples.extend(nested_tuples)
             else:
-                # Regular text, to be tokenized
-                text_to_tokenize += char
+                if prev_tag_word in UNPROCESSED_TAGS:
+                    # Inside of a style or script tag
+                    inside = ''
+                    tag_end = ''
 
-        curr_tokens = HTMLTokenizer._tokenize(text_to_tokenize, char_by_char)
+                    while char != '<':
+                        inside += char
+                        char = next(char_iter)
+
+                    while char != '>':
+                        tag_end += char
+                        char = next(char_iter)
+                    else:
+                        tag_end += char
+
+                    curr_tuples.append((inside, OTHER_ENT_TYPE))
+                    curr_tuples.append((tag_end, OTHER_ENT_TYPE))
+                else:
+                    # Regular text, to be tokenized
+                    text_to_tokenize += char
+
+        curr_tokens = HTMLTokenizer._tokenize(text_to_tokenize, c_by_c)
         HTMLTokenizer._add_tokens_to_tuples(
             curr_tuples,
             curr_tokens,
@@ -128,23 +142,93 @@ class HTMLTokenizer():
 
     @staticmethod
     def _preprocess_doc(doc):
-        # Close style tags
-        doc = re.sub('(?P<unclosed><style.+?>.+?{.+?})', '\g<unclosed></style>', doc)
+        # Removing hyperlinks to reduce dictionary size
+        processed = re.sub('href=".+?"', 'href=""', doc)
 
-        # Close script tags
-        doc = re.sub('(?P<unclosed><script.+?>.+?{.+?})', '\g<unclosed></script>', doc)
-
-        return doc
+        return processed
 
     @classmethod
     def inline_to_tuples(cls, doc: str, entities: list, char_by_char: bool):
         doc = cls._preprocess_doc(doc)
 
         return cls._inline_to_tuples(entities=entities,
-                                     char_by_char=char_by_char,
+                                     c_by_c=char_by_char,
                                      char_iter=iter(doc)
                                      )
 
-    def tuples_to_inline(cls):
-        # TODO
-        pass
+    @staticmethod
+    def _tuples_to_inline(tuples: list, c_by_c: bool):
+        inline_str = ''
+        tuples_iter = iter(tuples)
+
+        def add_entity(token, ent_type, c_by_c: bool,
+                       prev_was_entity=False):
+            """
+            Recursive function for adding entities to the inline string.
+            :param token: The entity's current token.
+            :param ent_type: Entity type of current token.
+            :param c_by_c: Whether to do char by char processing.
+            :param prev_was_entity: Whether previous call to this function
+                                    in the stack was from this function.
+            :return:
+            """
+            content = []
+            curr_str = ''
+            orig_ent_type = ent_type
+            stopped = False
+
+            if not prev_was_entity:
+                curr_str += f'<{orig_ent_type}>'
+
+            while ent_type == orig_ent_type:
+                content.append(token)
+                try:
+                    token, ent_type = next(tuples_iter)
+                except StopIteration:
+                    stopped = True
+                    break
+
+            if c_by_c:
+                curr_str += ''.join(content)
+                curr_str += f'</{orig_ent_type}>'
+
+                if not stopped:
+                    if ent_type == OTHER_ENT_TYPE:
+                        curr_str += f'{token}'
+                    else:
+                        curr_str += f'<{ent_type}>'
+                        curr_str += add_entity(token, ent_type, c_by_c,
+                                               prev_was_entity=True)
+            else:
+                curr_str += ' '.join(content)
+                curr_str += f'</{orig_ent_type}> '
+
+                if not stopped:
+                    if ent_type == OTHER_ENT_TYPE:
+                        curr_str += f'{token} '
+                    else:
+                        curr_str += f'<{ent_type}>'
+                        curr_str += add_entity(token, ent_type, c_by_c,
+                                               prev_was_entity=True)
+
+            return curr_str
+
+        # Process tokens tuple by tuple
+        for token, ent_type in tuples_iter:
+            if ent_type == OTHER_ENT_TYPE:
+                if c_by_c:
+                    inline_str += f'{token}'
+                else:
+                    inline_str += f'{token} '
+            else:
+                inline_str += add_entity(token, ent_type, c_by_c)
+
+        if not c_by_c:
+            inline_str = inline_str.rstrip()
+
+        return inline_str
+
+    @classmethod
+    def tuples_to_inline(cls, tuples: list, char_by_char: bool):
+        return cls._tuples_to_inline(tuples=tuples,
+                                     c_by_c=char_by_char)

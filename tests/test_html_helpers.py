@@ -1,6 +1,5 @@
 from src.html_helpers import HTMLTokenizer, OTHER_ENT_TYPE
 
-
 def test_nested_inside_simple():
     doc = '<html>Hey, my name is <name>Luca</name>.</html>'
     entities = ['name']
@@ -190,7 +189,7 @@ def test_nested_inside_10():
 
 def test_nested_out_and_in():
     doc = '<html>Hey, my name is ' \
-          '<style whatever><name><strong>Luca</strong></name></style>.</html>'
+          '<style {whatever}><name><strong>Luca</strong></name>.</html>'
     entities = ['name']
     tuples_c_by_c = HTMLTokenizer.inline_to_tuples(doc, entities,
                                                    char_by_char=True)
@@ -234,7 +233,7 @@ def test_nested_out_and_in():
         ('my', OTHER_ENT_TYPE),
         ('name', OTHER_ENT_TYPE),
         ('is', OTHER_ENT_TYPE),
-        ('<style whatever>', OTHER_ENT_TYPE),
+        ('<style {whatever}>', OTHER_ENT_TYPE),
         ('<strong>', OTHER_ENT_TYPE),
         ('Luca', 'name'),
         ('</strong>', OTHER_ENT_TYPE),
@@ -430,12 +429,6 @@ def test_double_entity_tag():
 
 
 def test_onesided_tag():
-    # For one-sided HTML tags, with no closing brackets, such as <style ...>
-    # TODO see TODO in html_helpers.py
-    # Right now, parsing of one-sided tags is not ideal, as the
-    # '.cls {display: none;}' part
-    # is being parsed as regular readable text. However, functionality is not
-    # broken.
     doc = '<html><style type="text/css">.cls ' \
           '{display: none;} Hey, my name is <name>Luca</name>.</html>'
     entities = ['name']

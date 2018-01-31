@@ -18,11 +18,9 @@ class InputGenerator():
         def gen():
             with open(self.fp) as f:
                 for doc in f:
-                    yield HTMLTokenizer.inline_to_tuples(
-                        doc=doc.strip(),
-                        entities=self.entities,
-                        char_by_char=self.c_by_c
-                        )
+                    yield HTMLTokenizer.inline_to_tuples(doc=doc.strip(),
+                                                         entities=self.entities,
+                                                         char_by_char=self.c_by_c)
 
         self.gen = gen()
 
