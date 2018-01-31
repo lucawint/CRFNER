@@ -201,11 +201,15 @@ class HTMLTokenizer():
                                                prev_was_entity=True)
             else:
                 curr_str += ' '.join(content)
-                curr_str += f'</{orig_ent_type}> '
+                curr_str += f'</{orig_ent_type}>'
+                if not c_by_c:
+                    curr_str += ' '
 
                 if not stopped:
                     if ent_type == OTHER_ENT_TYPE:
-                        curr_str += f'{token} '
+                        curr_str += f'{token}'
+                        if not c_by_c:
+                            curr_str += ' '
                     else:
                         curr_str += f'<{ent_type}>'
                         curr_str += add_entity(token, ent_type, c_by_c,

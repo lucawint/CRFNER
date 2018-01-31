@@ -28,13 +28,13 @@ def test_conll2002_eval(conll_model_dir_esp):
 
     # Evaluate
     print('\nResults for train file, tokenizing word by word')
-    ner.evaluate(fp='/Users/luca/PycharmProjects/CRFNER/tests/test_files/conll_esp/esp.train_inline.txt')
+    ner.evaluate(fp='test_files/conll_esp/esp.train_inline.txt')
 
     print('\nResults for test file a')
-    ner.evaluate(fp='/Users/luca/PycharmProjects/CRFNER/tests/test_files/conll_esp/esp.testa_inline.txt')
+    ner.evaluate(fp='test_files/conll_esp/esp.testa_inline.txt')
 
     print('\nResults for test file b')
-    ner.evaluate(fp='/Users/luca/PycharmProjects/CRFNER/tests/test_files/conll_esp/esp.testb_inline.txt')
+    ner.evaluate(fp='test_files/conll_esp/esp.testb_inline.txt')
 
 
 def test_conll2002_eval_c_by_c(conll_model_dir_esp_c_by_c):
@@ -42,13 +42,13 @@ def test_conll2002_eval_c_by_c(conll_model_dir_esp_c_by_c):
 
     # Evaluate
     print('\nResults for train file, tokenizing char by char')
-    ner.evaluate(fp='/Users/luca/PycharmProjects/CRFNER/tests/test_files/conll_esp/esp.train_inline.txt')
+    ner.evaluate(fp='test_files/conll_esp/esp.train_inline.txt')
 
     print('\nResults for test file a')
-    ner.evaluate(fp='/Users/luca/PycharmProjects/CRFNER/tests/test_files/conll_esp/esp.testa_inline.txt')
+    ner.evaluate(fp='test_files/conll_esp/esp.testa_inline.txt')
 
     print('\nResults for test file b')
-    ner.evaluate(fp='/Users/luca/PycharmProjects/CRFNER/tests/test_files/conll_esp/esp.testb_inline.txt')
+    ner.evaluate(fp='test_files/conll_esp/esp.testb_inline.txt')
 
 
 def test_tag_document(conll_model_dir_esp):
@@ -56,7 +56,7 @@ def test_tag_document(conll_model_dir_esp):
 
     model = CRFNER.from_model(conll_model_dir_esp)
 
-    expected = 'El <ORG>Departamento de Seguridad Nacional</ORG> decidió terminar con el <ORG>Estatus de Protección Temporal</ORG> para <LOC>El Salvador</LOC> con un período de inactividad de 18 meses , de acuerdo con una fuente familiarizada con la decisión.'
+    expected = 'El <ORG>Departamento de Seguridad Nacional</ORG> decidió terminar con el <ORG>Estatus de Protección Temporal para El Salvador</ORG> con un período de inactividad de 18 meses , de acuerdo con una fuente familiarizada con la decisión.'
     res = model.tag_document(doc)
 
     assert expected == res
@@ -82,7 +82,7 @@ def test_tag_list_of_docs(conll_model_dir_esp):
     model = CRFNER.from_model(conll_model_dir_esp)
 
     expected = [
-        'El <ORG>Departamento de Seguridad Nacional</ORG> decidió terminar con el <ORG>Estatus de Protección Temporal</ORG> para <LOC>El Salvador</LOC> con un período de inactividad de 18 meses , de acuerdo con una fuente familiarizada con la decisión.',
+        'El <ORG>Departamento de Seguridad Nacional</ORG> decidió terminar con el <ORG>Estatus de Protección Temporal para El Salvador</ORG> con un período de inactividad de 18 meses , de acuerdo con una fuente familiarizada con la decisión.',
         '<PER>Oprah Winfrey: Nadie</PER> tendrá que volver a decir "yo también"',
         'Para el profesor de la <ORG>Universidad de Columbia</ORG> , <PER>Pedro Freyre</PER> , fue "un paso mal dado" que el presidente de <ORG>EE.UU.</ORG> hiciera este reconocimiento. El periodista argentino <PER>José Benegas</PER> dice que "esta jugada" de <PER>Donald Trump</PER> "tiene que ver con la amenaza iraní".'
     ]
@@ -100,7 +100,7 @@ def test_tag_from_filepath(conll_model_dir_esp,
         'Para el profesor de la Universidad de Columbia, Pedro Freyre, fue "un paso mal dado" que el presidente de EE.UU. hiciera este reconocimiento. El periodista argentino José Benegas dice que "esta jugada" de Donald Trump "tiene que ver con la amenaza iraní".']
 
     expected = [
-        'El <ORG>Departamento de Seguridad Nacional</ORG> decidió terminar con el <ORG>Estatus de Protección Temporal</ORG> para <LOC>El Salvador</LOC> con un período de inactividad de 18 meses , de acuerdo con una fuente familiarizada con la decisión.',
+        'El <ORG>Departamento de Seguridad Nacional</ORG> decidió terminar con el <ORG>Estatus de Protección Temporal para El Salvador</ORG> con un período de inactividad de 18 meses , de acuerdo con una fuente familiarizada con la decisión.',
         '<PER>Oprah Winfrey: Nadie</PER> tendrá que volver a decir "yo también"',
         'Para el profesor de la <ORG>Universidad de Columbia</ORG> , <PER>Pedro Freyre</PER> , fue "un paso mal dado" que el presidente de <ORG>EE.UU.</ORG> hiciera este reconocimiento. El periodista argentino <PER>José Benegas</PER> dice que "esta jugada" de <PER>Donald Trump</PER> "tiene que ver con la amenaza iraní".'
     ]
