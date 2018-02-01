@@ -1,5 +1,6 @@
 from src.html_helpers import HTMLTokenizer, OTHER_ENT_TYPE
 
+
 def test_nested_inside_simple():
     doc = '<html>Hey, my name is <name>Luca</name>.</html>'
     entities = ['name']
@@ -188,13 +189,15 @@ def test_nested_inside_10():
 
 
 def test_nested_out_and_in():
-    doc = '<html>Hey, my name is ' \
-          '<style {whatever}><name><strong>Luca</strong></name>.</html>'
+    doc = '<html><style {whatever}></style>Hey, my name is ' \
+          '<name><strong>Luca</strong></name>.</html>'
     entities = ['name']
     tuples_c_by_c = HTMLTokenizer.inline_to_tuples(doc, entities,
                                                    char_by_char=True)
     expected = [
         ('<html>', OTHER_ENT_TYPE),
+        ('<style {whatever}>', OTHER_ENT_TYPE),
+        ('</style>', OTHER_ENT_TYPE),
         ('H', OTHER_ENT_TYPE),
         ('e', OTHER_ENT_TYPE),
         ('y', OTHER_ENT_TYPE),
@@ -211,14 +214,12 @@ def test_nested_out_and_in():
         ('i', OTHER_ENT_TYPE),
         ('s', OTHER_ENT_TYPE),
         (' ', OTHER_ENT_TYPE),
-        ('<style whatever>', OTHER_ENT_TYPE),
         ('<strong>', OTHER_ENT_TYPE),
         ('L', 'name'),
         ('u', 'name'),
         ('c', 'name'),
         ('a', 'name'),
         ('</strong>', OTHER_ENT_TYPE),
-        ('</style>', OTHER_ENT_TYPE),
         ('.', OTHER_ENT_TYPE),
         ('</html>', OTHER_ENT_TYPE)
     ]
@@ -228,16 +229,16 @@ def test_nested_out_and_in():
                                                    char_by_char=False)
     expected = [
         ('<html>', OTHER_ENT_TYPE),
+        ('<style {whatever}>', OTHER_ENT_TYPE),
+        ('</style>', OTHER_ENT_TYPE),
         ('Hey', OTHER_ENT_TYPE),
         (',', OTHER_ENT_TYPE),
         ('my', OTHER_ENT_TYPE),
         ('name', OTHER_ENT_TYPE),
         ('is', OTHER_ENT_TYPE),
-        ('<style {whatever}>', OTHER_ENT_TYPE),
         ('<strong>', OTHER_ENT_TYPE),
         ('Luca', 'name'),
         ('</strong>', OTHER_ENT_TYPE),
-        ('</style>', OTHER_ENT_TYPE),
         ('.', OTHER_ENT_TYPE),
         ('</html>', OTHER_ENT_TYPE),
     ]
@@ -425,85 +426,4 @@ def test_double_entity_tag():
         ('.', OTHER_ENT_TYPE),
         ('</html>', OTHER_ENT_TYPE)
     ]
-    assert tuples_w_by_w == expected
-
-
-def test_onesided_tag():
-    doc = '<html><style type="text/css">.cls ' \
-          '{display: none;} Hey, my name is <name>Luca</name>.</html>'
-    entities = ['name']
-    tuples_c_by_c = HTMLTokenizer.inline_to_tuples(doc, entities,
-                                                   char_by_char=True)
-
-    expected = [
-        ('<html>', OTHER_ENT_TYPE),
-        ('<style type="text/css">', OTHER_ENT_TYPE),
-        ('.', OTHER_ENT_TYPE),
-        ('c', OTHER_ENT_TYPE),
-        ('l', OTHER_ENT_TYPE),
-        ('s', OTHER_ENT_TYPE),
-        (' ', OTHER_ENT_TYPE),
-        ('{', OTHER_ENT_TYPE),
-        ('d', OTHER_ENT_TYPE),
-        ('i', OTHER_ENT_TYPE),
-        ('s', OTHER_ENT_TYPE),
-        ('p', OTHER_ENT_TYPE),
-        ('l', OTHER_ENT_TYPE),
-        ('a', OTHER_ENT_TYPE),
-        ('y', OTHER_ENT_TYPE),
-        (':', OTHER_ENT_TYPE),
-        (' ', OTHER_ENT_TYPE),
-        ('n', OTHER_ENT_TYPE),
-        ('o', OTHER_ENT_TYPE),
-        ('n', OTHER_ENT_TYPE),
-        ('e', OTHER_ENT_TYPE),
-        (';', OTHER_ENT_TYPE),
-        ('}', OTHER_ENT_TYPE),
-        ('</style>', OTHER_ENT_TYPE),
-        (' ', OTHER_ENT_TYPE),
-        ('H', OTHER_ENT_TYPE),
-        ('e', OTHER_ENT_TYPE),
-        ('y', OTHER_ENT_TYPE),
-        (',', OTHER_ENT_TYPE),
-        (' ', OTHER_ENT_TYPE),
-        ('m', OTHER_ENT_TYPE),
-        ('y', OTHER_ENT_TYPE),
-        (' ', OTHER_ENT_TYPE),
-        ('n', OTHER_ENT_TYPE),
-        ('a', OTHER_ENT_TYPE),
-        ('m', OTHER_ENT_TYPE),
-        ('e', OTHER_ENT_TYPE),
-        (' ', OTHER_ENT_TYPE),
-        ('i', OTHER_ENT_TYPE),
-        ('s', OTHER_ENT_TYPE),
-        (' ', OTHER_ENT_TYPE),
-        ('L', 'name'),
-        ('u', 'name'),
-        ('c', 'name'),
-        ('a', 'name'),
-        ('.', OTHER_ENT_TYPE),
-        ('</html>', OTHER_ENT_TYPE)
-    ]
-
-    assert tuples_c_by_c == expected
-
-    tuples_w_by_w = HTMLTokenizer.inline_to_tuples(doc, entities,
-                                                   char_by_char=False)
-    expected = [
-        ('<html>', OTHER_ENT_TYPE),
-        ('<style type="text/css">', OTHER_ENT_TYPE),
-        ('.cls', OTHER_ENT_TYPE),
-        ('{display:', OTHER_ENT_TYPE),
-        ('none;}', OTHER_ENT_TYPE),
-        ('</style>', OTHER_ENT_TYPE),
-        ('Hey', OTHER_ENT_TYPE),
-        (',', OTHER_ENT_TYPE),
-        ('my', OTHER_ENT_TYPE),
-        ('name', OTHER_ENT_TYPE),
-        ('is', OTHER_ENT_TYPE),
-        ('Luca', 'name'),
-        ('.', OTHER_ENT_TYPE),
-        ('</html>', OTHER_ENT_TYPE)
-    ]
-
     assert tuples_w_by_w == expected

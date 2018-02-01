@@ -23,32 +23,19 @@ def test_conll2002_training(conll_config_fp):
     assert ner.crf.classes_ == ['LOC', 'O', 'ORG', 'PER', 'MISC']
 
 
-def test_conll2002_eval(conll_model_dir_esp):
+def test_conll2002_eval(conll_model_dir_esp, eval_filepath):
     ner = CRFNER.from_model(conll_model_dir_esp)
 
     # Evaluate
-    print('\nResults for train file, tokenizing word by word')
-    ner.evaluate(fp='test_files/conll_esp/esp.train_inline.txt')
+    print(f'\nResults for {eval_filepath}, tokenizing word by word')
+    ner.evaluate(fp=eval_filepath)
 
-    print('\nResults for test file a')
-    ner.evaluate(fp='test_files/conll_esp/esp.testa_inline.txt')
-
-    print('\nResults for test file b')
-    ner.evaluate(fp='test_files/conll_esp/esp.testb_inline.txt')
-
-
-def test_conll2002_eval_c_by_c(conll_model_dir_esp_c_by_c):
+def test_conll2002_eval_c_by_c(conll_model_dir_esp_c_by_c, eval_filepath):
     ner = CRFNER.from_model(conll_model_dir_esp_c_by_c)
 
     # Evaluate
-    print('\nResults for train file, tokenizing char by char')
-    ner.evaluate(fp='test_files/conll_esp/esp.train_inline.txt')
-
-    print('\nResults for test file a')
-    ner.evaluate(fp='test_files/conll_esp/esp.testa_inline.txt')
-
-    print('\nResults for test file b')
-    ner.evaluate(fp='test_files/conll_esp/esp.testb_inline.txt')
+    print(f'\nResults for {eval_filepath}, tokenizing char by char')
+    ner.evaluate(fp=eval_filepath)
 
 
 def test_tag_document(conll_model_dir_esp):
