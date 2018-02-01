@@ -1,6 +1,5 @@
 """Fixtures shared by multiple tests as recommended in pytest documentation."""
 import os.path
-from os import remove
 from tempfile import mkstemp
 
 import pytest
@@ -9,16 +8,25 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 TEST_FILES_DIR = os.path.join(script_dir, 'test_files')
 
 
-@pytest.fixture()
+@pytest.fixture(scope='session')
 def conll_config_fp():
     return os.path.join(TEST_FILES_DIR, 'training_conll2002.ini')
 
 
-@pytest.fixture()
+@pytest.fixture(params=['esp.train_inline.txt', 'esp.testa_inline.txt',
+                        'esp.testb_inline.txt'])
+def eval_filepath(request):
+    _conll_esp_dir = os.path.join(TEST_FILES_DIR, 'conll_esp')
+    email_fp = os.path.join(_conll_esp_dir, request.param)
+    return os.path.join(TEST_FILES_DIR, email_fp)
+
+
+@pytest.fixture(scope='session')
 def conll_model_dir_esp():
     return os.path.join(TEST_FILES_DIR, 'conll_esp/model_w_by_w')
 
-@pytest.fixture()
+
+@pytest.fixture(scope='session')
 def conll_model_dir_esp_c_by_c():
     return os.path.join(TEST_FILES_DIR, 'conll_esp/model_c_by_c')
 
@@ -31,7 +39,8 @@ def tagged_email(request):
     with open(email_fp, 'r', encoding='utf-8') as f:
         yield f.read()
 
-@pytest.fixture()
+
+@pytest.fixture(scope='session')
 def temp_filepath():
     filepaths = []
 
@@ -46,10 +55,3 @@ def temp_filepath():
     # Cleanup
     for fp in filepaths:
         os.remove(fp)
-
-
-@pytest.fixture()
-def temp_filepath2():
-    fp = mkstemp()[1]
-    yield fp
-    remove(fp)
